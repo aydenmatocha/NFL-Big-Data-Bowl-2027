@@ -31,3 +31,5 @@ summarize_plays <- function(input_df) {
   play_summary <- play_summary %>% filter(!is.na(actual_separation), !is.na(team_coverage_man_zone))
   return(play_summary)
 }
+
+summarized_wr <- summarize_plays(pbp_wr)

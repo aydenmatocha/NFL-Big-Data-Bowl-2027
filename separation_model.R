@@ -23,6 +23,9 @@ xgboost_spec <-
 xgboost_recipe <- 
   recipe(formula = actual_separation ~  . , data = plays_train) %>%
   step_rm(game_id, play_id, nfl_id) %>%
+  step_mutate(in_motion_at_ball_snap = as.integer(in_motion_at_ball_snap)) %>%
+  step_other(all_nominal_predictors(), threshold = 0.01) %>%
+  step_novel(all_nominal_predictors()) %>%
   step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%
   step_zv(all_predictors())  %>%
   step_corr(all_numeric_predictors(), threshold = 0.9)

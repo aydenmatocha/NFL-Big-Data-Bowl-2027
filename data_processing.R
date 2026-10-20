@@ -22,9 +22,6 @@ pbp_cedric <- pbp_wr_tracking %>% filter(nfl_id == 55939) %>%
 
 combine_tracking <- read.csv("data/combine_tracking.csv")
 
-# distance traveled
-
-
 # Summarize every play given a df
 summarize_plays <- function(input_df) {
   play_summary <- input_df %>%

@@ -18,7 +18,6 @@ xgboost_spec <-
              sample_size = tune()) %>%
   set_mode("regression") %>%
   set_engine("xgboost") 
-#xgboost_spec
 
 xgboost_recipe <- 
   recipe(formula = actual_separation ~  . , data = plays_train) %>%
@@ -34,7 +33,6 @@ xgboost_workflow <-
   workflow() %>%
   add_recipe(xgboost_recipe) %>%
   add_model(xgboost_spec) 
-#xgboost_workflow
 
 set.seed(49)
 xgboost_tune <- tune_grid(

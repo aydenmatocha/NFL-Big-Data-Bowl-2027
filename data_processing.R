@@ -13,12 +13,13 @@ pbp_wr <- pbp %>% filter(nfl_id %in% wr_ids, team_coverage_man_zone == "MAN_COVE
 game_tracking_wr <- game_tracking %>% filter(nfl_id %in% wr_ids)
 
 pbp_wr_tracking <- pbp_wr %>% left_join(game_tracking_wr, by = c("game_id", "play_id", "nfl_id"))
+#pbp_tracking <- pbp %>% left_join(game_tracking, by = c("game_id", "play_id", "nfl_id"))
 
 # testing
 pbp_cedric <- pbp_wr_tracking %>% filter(nfl_id == 55939) %>%
   select(game_id, play_id, nfl_id, separation_at_pass_forward, cushion, route_ran, 
          team_coverage_type, offense_formation, receiver_alignment, in_motion_at_ball_snap, 
-         x, y, event)
+         x, y, s, dir, event)
 
 combine_tracking <- read.csv("data/combine_tracking.csv")
 
@@ -27,6 +28,8 @@ summarize_plays <- function(input_df) {
   play_summary <- input_df %>%
     group_by(game_id, play_id, nfl_id) %>% 
     group_modify(~ {
+      #df <- .x %>% mutate(frame_id = row_number())
+      #.x$frame_id <- 1:nrow(.x)
       play <- .x[1, ] # should be 1 row
       x_at_snap <- .x %>% filter(event == "ball_snap") %>% pull(x)
       y_at_snap <- .x %>% filter(event == "ball_snap") %>% pull(y)
@@ -34,8 +37,8 @@ summarize_plays <- function(input_df) {
       y_at_throw <- .x %>% filter(event == "pass_forward") %>% pull(y)
       distance_traveled <- sqrt((x_at_throw-x_at_snap)^2+(y_at_throw-y_at_snap)^2)
       
-      snap <- which(.x$event == "ball_snap")
-      throw <- which(.x$event == "pass_forward")
+      snap <- which(.x$event == "ball_snap")[1]
+      throw <- which(.x$event == "pass_forward")[1]
       frames_bef_throw <- throw - snap
         
       tibble(

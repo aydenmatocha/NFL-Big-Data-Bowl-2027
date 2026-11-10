@@ -10,7 +10,7 @@ leaderboard <- final_results %>%
   group_by(nfl_id) %>%
   summarize(
     n_plays = n(),
-    avg_cse = mean(sep_residual),
+    avg_soe = mean(sep_residual),
     .groups = "drop"
   ) %>%
-  arrange(-avg_cse)
+  arrange(-avg_soe)

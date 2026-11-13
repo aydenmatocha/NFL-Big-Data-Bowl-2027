@@ -3,7 +3,6 @@ library(ggplot2)
 library(gganimate)
 library(sportyR)
 library(nflreadr)
-teams_colors_logos <- nflreadr::load_teams()
 #source("data_processing.R")
 
 # Animate a drill without a ball

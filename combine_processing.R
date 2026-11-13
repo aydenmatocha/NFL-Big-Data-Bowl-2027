@@ -6,30 +6,9 @@ combine_results <- read.csv("data/combine_results.csv")
 combine_tracking <- read.csv("data/combine_tracking.csv")
 
 ten_yd <- c()
-gauntlet_avg_s <- c()
 a_break_short <- c()
 a_break_med <- c()
 a_break_deep <- c()
-
-get_gauntlet_avg_s <- function(tracking) {
-  gauntlet_tracking <- tracking %>% filter(drill_name == "GAUNTLET_DRILL", y >= 5 & y <= 45)
-  if (nrow(gauntlet_tracking) == 0) { # if didn't run, return NA
-    return(NA)
-  }
-
-  attempts <- gauntlet_tracking %>% pull(attempt)
-  highest <- NA
-  # Get highest avg speed from all attempts
-  for (i in attempts) {
-    gauntlet_att <- gauntlet_tracking %>% filter(attempt == i)
-    avg_s <- mean(gauntlet_att$s)
-      
-    if (is.na(highest) | highest < avg_s) {
-      highest <- avg_s
-    }
-  }
-  return(highest)
-}
 
 angle_diff <- function(a, b) ((a - b + 180) %% 360) - 180
 
@@ -93,7 +72,6 @@ get_a_break_med <- function(tracking) {
     ungroup()
   
   # determine cut frame
-  angle_diff <- function(a, b) ((a - b + 180) %% 360) - 180
   attempts <- dagger_tracking %>% pull(attempt)
   highest <- 0
   for (i in attempts) {
@@ -101,7 +79,7 @@ get_a_break_med <- function(tracking) {
     cut_frame <- get_break_frame(dagger_att)
     if (is.na(cut_frame)) next
     
-    rec_a <- dagger_att[cut_frame+2, ] %>% pull(a)
+    rec_a <- dagger_att[cut_frame-2, ] %>% pull(a)
     
     if (rec_a > highest) {
       highest <- rec_a
@@ -123,7 +101,6 @@ get_a_break_deep <- function(tracking, k = 3, min_turn = 45, min_speed = 2) {
     ungroup()
   
   # determine cut frame
-  angle_diff <- function(a, b) ((a - b + 180) %% 360) - 180
   attempts <- corner_tracking %>% pull(attempt)
   highest <- 0
   for (i in attempts) {
@@ -148,9 +125,6 @@ for (i in wr_ids) {
   ten_yd <- c(ten_yd, results$ten_yd_split)
 
   # tracking calculations
-  # gauntlet avg s
-  gauntlet_avg_s <- c(gauntlet_avg_s, get_gauntlet_avg_s(tracking))
-  
   a_break_short <- c(a_break_short, get_a_break_short(tracking))
   a_break_med <- c(a_break_med, get_a_break_med(tracking))
   a_break_deep <- c(a_break_deep, get_a_break_deep(tracking))
@@ -159,7 +133,6 @@ for (i in wr_ids) {
 wr_combine_results <- data.frame(
   nfl_id = wr_ids,
   ten_yd_split = ten_yd,
-  gauntlet_avg_s = gauntlet_avg_s,
   a_break_short = a_break_short,
   a_break_med = a_break_med,
   a_break_deep = a_break_deep
@@ -171,6 +144,6 @@ wr_combine_results$n_NA <- rowSums(is.na(wr_combine_results))
 leaderboard_50 <- leaderboard %>% filter(n_plays >= 50)
 join_test <- inner_join(leaderboard_50, wr_combine_results, by = "nfl_id")
 
-join_test_200 <- join_test %>% filter(n_plays >= 200, nfl_id != 57144)
-ggplot(join_test_200, aes(x = avg_cse, y = a_break_deep)) +
+join_test_200 <- join_test %>% filter(n_plays >= 200) #%>% filter(nfl_id != 57144)
+ggplot(join_test_200, aes(x = avg_soe, y = a_break_med)) +
   geom_point()

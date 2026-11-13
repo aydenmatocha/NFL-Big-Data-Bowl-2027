@@ -1,7 +1,7 @@
 library(tidyverse)
 library(xgboost)
 library(tidymodels)
-source("data_processing.R")
+#source("data_processing.R")
 
 plays <- summarized_wr %>%
   initial_split(prop=0.8, strata = actual_separation)

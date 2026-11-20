@@ -3,9 +3,8 @@ library(tidyverse)
 players <- read.csv("data/players.csv")
 wr_ids <- players %>% filter(nfl_position == "WR") %>% pull(nfl_id)
 combine_results <- read.csv("data/combine_results.csv")
-combine_tracking <- read.csv("data/combine_tracking.csv")
+combine_tracking <- read.csv("data/combine_tracking.csv") %>% filter(nfl_id %in% wr_ids)
 
-ten_yd <- c()
 a_break_short <- c()
 a_break_med <- c()
 a_break_deep <- c()
@@ -50,7 +49,7 @@ get_a_break_short <- function(tracking) {
     cut_frame <- get_break_frame(slant_att)
     if (is.na(cut_frame)) next
     
-    rec_a <- slant_att[cut_frame+2, ] %>% pull(a)
+    rec_a <- slant_att[cut_frame, ] %>% pull(a)
     
     if (rec_a > highest) {
       highest <- rec_a
@@ -79,7 +78,7 @@ get_a_break_med <- function(tracking) {
     cut_frame <- get_break_frame(dagger_att)
     if (is.na(cut_frame)) next
     
-    rec_a <- dagger_att[cut_frame-2, ] %>% pull(a)
+    rec_a <- dagger_att[cut_frame, ] %>% pull(a)
     
     if (rec_a > highest) {
       highest <- rec_a
@@ -108,7 +107,7 @@ get_a_break_deep <- function(tracking, k = 3, min_turn = 45, min_speed = 2) {
     cut_frame <- get_break_frame(corner_att)
     if (is.na(cut_frame)) next
     
-    rec_a <- corner_att[cut_frame+2, ] %>% pull(a)
+    rec_a <- corner_att[cut_frame, ] %>% pull(a)
     
     if (rec_a > highest) {
       highest <- rec_a
@@ -119,11 +118,8 @@ get_a_break_deep <- function(tracking, k = 3, min_turn = 45, min_speed = 2) {
 
 # Assign values
 for (i in wr_ids) {
-  results <- combine_results %>% filter(nfl_id == i)
   tracking <- combine_tracking %>% filter(nfl_id == i)
   
-  ten_yd <- c(ten_yd, results$ten_yd_split)
-
   # tracking calculations
   a_break_short <- c(a_break_short, get_a_break_short(tracking))
   a_break_med <- c(a_break_med, get_a_break_med(tracking))
@@ -132,7 +128,6 @@ for (i in wr_ids) {
 
 wr_combine_results <- data.frame(
   nfl_id = wr_ids,
-  ten_yd_split = ten_yd,
   a_break_short = a_break_short,
   a_break_med = a_break_med,
   a_break_deep = a_break_deep
@@ -141,9 +136,10 @@ wr_combine_results <- data.frame(
 wr_combine_results$n_NA <- rowSums(is.na(wr_combine_results))
 
 # Testing
-leaderboard_50 <- leaderboard %>% filter(n_plays >= 50)
-join_test <- inner_join(leaderboard_50, wr_combine_results, by = "nfl_id")
-
-join_test_200 <- join_test %>% filter(n_plays >= 200) #%>% filter(nfl_id != 57144)
-ggplot(join_test_200, aes(x = avg_soe, y = a_break_med)) +
-  geom_point()
+# for (i in wr_ids) {
+#   tracking <- combine_tracking %>% filter(nfl_id == i)
+#   a_break_deep <- c(a_break_deep, get_a_break_deep(tracking))
+# }
+# 
+# ggplot(leaderboard_200, aes(x = weighted_soe, y = a_break_short, size = n_plays)) +
+#   geom_point()

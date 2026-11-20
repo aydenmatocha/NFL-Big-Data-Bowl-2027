@@ -12,8 +12,8 @@ game_tracking <- bind_rows(game_tracking_2023, game_tracking_2024, game_tracking
 pbp_wr <- pbp %>% filter(nfl_id %in% wr_ids, team_coverage_man_zone == "MAN_COVERAGE")
 game_tracking_wr <- game_tracking %>% filter(nfl_id %in% wr_ids)
 
-pbp_wr_tracking <- pbp_wr %>% left_join(game_tracking_wr, by = c("game_id", "play_id", "nfl_id"))
-#pbp_tracking <- pbp %>% left_join(game_tracking, by = c("game_id", "play_id", "nfl_id"))
+pbp_wr_tracking <- pbp_wr %>% left_join(game_tracking_wr, by = c("game_id", "play_id", "nfl_id")) %>%
+  filter(route_ran != "SCREEN", route_ran != "FLAT", route_ran != "WHEEL", route_ran != "ANGLE")
 
 # testing
 pbp_cedric <- pbp_wr_tracking %>% filter(nfl_id == 55939) %>%
@@ -21,7 +21,6 @@ pbp_cedric <- pbp_wr_tracking %>% filter(nfl_id == 55939) %>%
          team_coverage_type, offense_formation, receiver_alignment, in_motion_at_ball_snap, 
          x, y, s, dir, event)
 
-combine_tracking <- read.csv("data/combine_tracking.csv")
 
 # Summarize every play given a df
 summarize_plays <- function(input_df) {
